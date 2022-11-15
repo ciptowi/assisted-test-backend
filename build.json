@@ -2,8 +2,8 @@
   "builds": [
     {
       "require": "@vercel/node",
-      "apiVersion": 3,
-      "src": "index.js",
+      "apiVersion": 2,
+      "src": "*.js",
       "use": "@vercel/node"
     }
   ]

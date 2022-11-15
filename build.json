@@ -1,0 +1,10 @@
+{
+  "builds": [
+    {
+      "require": "@vercel/node",
+      "apiVersion": 3,
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ]
+}

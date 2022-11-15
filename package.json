@@ -25,6 +25,7 @@
   "devDependencies": {
     "netlify-cli": "^12.1.1",
     "nodemon": "^2.0.20",
-    "sequelize-cli": "^6.5.2"
+    "sequelize-cli": "^6.5.2",
+    "vercel": "^28.5.1"
   }
 }

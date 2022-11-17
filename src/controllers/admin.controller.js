@@ -20,13 +20,13 @@ exports.register = (req, res) => {
     status: 1
   }
   if (payload.username === null || payload.username === '') {
-    response.build(res, 400, false, null, 'Username cannot be empty', null)
+    response.build(res, 200, false, 'Username cannot be empty', null, null)
   } else if (payload.password === null || payload.password === '') {
-    response.build(res, 400, false, null, 'Password cannot be empty', null)
+    response.build(res, 200, false, 'Password cannot be empty', null, null)
   } else {
     Admin.findOne({ where: { username: req.body.username } }).then((data) => {
       if (data) {
-        response.build(res, 400, false, null, 'Username alredy existing', null)
+        response.build(res, 200, false, 'Username alredy existing', null, null)
       } else {
         Admin.create(payload).then(() => {
           response.build(res, 201, true, `New account created, successfuly`, null, null)
@@ -40,15 +40,15 @@ exports.register = (req, res) => {
 
 exports.login = (req, res) => {
   if (req.body.username === null || req.body.username === '') {
-    response.build(res, 400, false, null, 'Username cannot be empty', null)
+    response.build(res, 200, false, 'Username cannot be empty', null, null)
   } else if (req.body.password === null || req.body.password === '') {
-    response.build(res, 400, false, null, 'Password cannot be empty', null)
+    response.build(res, 200, false, 'Password cannot be empty', null, null)
   } else {
     Admin.findOne({ where: { username: req.body.username } }).then((data) => {
       if(!data) {
-        response.build(res, 404, false, null, 'Failed! Username Not found', null)
+        response.build(res, 200, false, 'Failed! Username Not found', null, null)
       } else if(!checkPassword(req.body.password, data.password)) {
-        response.build(res, 401, false, null, 'Failed! Wrong Password', null)
+        response.build(res, 200, false, 'Failed! Wrong Password', null, null)
       } else {
         const payload = {
           id: data.id,
@@ -85,7 +85,7 @@ exports.update = (req, res) => {
   })
   Admin.findOne({ where: { id: credential.id } }).then((data) => {
     if(!checkPassword(oldPassword, data.password)) {
-      response.build(res, 401, false, null, 'Failed! Wrong Password', null)
+      response.build(res, 200, false, 'Failed! Wrong Password', null, null)
     } else {
       Admin.update(payload, { where: { id: credential.id } }).then(() => {
         response.build(res, 201, true, `Account was updated successfully`, null, null)

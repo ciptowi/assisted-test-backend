@@ -32,6 +32,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('test+results');
+    await queryInterface.dropTable('test_results');
   }
 };

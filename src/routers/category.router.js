@@ -7,7 +7,7 @@ module.exports = function (router) {
     next();
   });
   router.post('/category/insert', middleware.protected, controller.insert);
-  router.get('/category', middleware.protected, controller.get);
-  router.get('/category/:id', middleware.protected, controller.getById);
+  router.get('/category', controller.get);
+  router.get('/category/:id', controller.getById);
   router.put('/category/:id', middleware.protected, controller.update);
 };

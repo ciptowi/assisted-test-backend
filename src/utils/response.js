@@ -7,7 +7,7 @@ exports.build = (res, code, success, msg, data, err) => {
   });
 };
 
-exports.success = (res, msg, data) => {
+exports.success = (res, data) => {
   return res.status(200).json({
     success: true,
     message: 'Success',

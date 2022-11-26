@@ -7,7 +7,7 @@ module.exports = {
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
-    dialect: 'mysql',
+    dialect: process.env.DB_DIALECT,
     dialectOptions: {
       bigNumberStrings: true
     }
@@ -18,18 +18,18 @@ module.exports = {
     database: process.env.CI_DB_NAME,
     host: process.env.CI_DB_HOST,
     port: process.env.CI_DB_PORT,
-    dialect: 'mysql',
+    dialect: process.env.DB_DIALECT,
     dialectOptions: {
       bigNumberStrings: true
     }
   },
   production: {
-    username: 'sql12560498',
-    password: '2lUvTiUJJj',
-    database: 'sql12560498',
-    host: 'sql12.freemysqlhosting.net',
-    port: 3306,
-    dialect: 'mysql',
+    username: 'postgres',
+    password: 'BeP@fYEgVrA4D3L',
+    database: 'postgres',
+    host: 'db.skedcpjvuwveaimonxgz.supabase.co',
+    port: 5432,
+    dialect: 'postgres',
     dialectOptions: {
       bigNumberStrings: true,
     }

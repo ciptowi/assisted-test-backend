@@ -8,5 +8,5 @@ module.exports = function (router) {
   });
   router.post('/admin/register', controller.register);
   router.post('/admin/login', controller.login);
-  router.put('/admin/update', middleware.verifyToken, controller.update);
+  router.put('/admin/update', middleware.protected, controller.update);
 };

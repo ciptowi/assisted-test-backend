@@ -3,6 +3,50 @@ exports.build = (res, code, success, msg, data, err) => {
     success: success,
     message: msg,
     data: data,
-    error: err,
+    error: err
+  });
+};
+
+exports.success = (res, msg, data) => {
+  return res.status(200).json({
+    success: true,
+    message: 'Success',
+    data: data
+  });
+};
+
+exports.created = (res) => {
+  return res.status(201).json({
+    success: true,
+    message: 'Created Successfully'
+  });
+};
+
+exports.authFailed = (res, msg) => {
+  return res.status(200).json({
+    success: false,
+    message: msg
+  });
+};
+
+exports.error500 = (res, err) => {
+  return res.status(500).json({
+    success: false,
+    message: 'Internal Server Error !',
+    error: err
+  });
+};
+
+exports.unauthorized = (res) => {
+  return res.status(401).json({
+    success: false,
+    message: 'Unauthorized !'
+  });
+};
+
+exports.tokenLess = (res) => {
+  return res.status(403).json({
+    success: false,
+    message: 'No token provided !'
   });
 };

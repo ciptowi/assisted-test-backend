@@ -1,13 +1,8 @@
 const { Admin } = require('../db/models');
-const bcrypt = require('bcryptjs');
 const response = require('../utils/response');
+const auth = require('../middlewares/auth.middleware');
 const jwt = require('jsonwebtoken');
 const secret = require('../config/secret');
-// const token = require('../middlewares/verification');
-
-const hashPassword = (password) => bcrypt.hashSync(password, 10)
-const checkPassword = (password, existPass) => bcrypt.compareSync(password, existPass);
-const generateToken = (payload) => jwt.sign(payload, secret.key);
 
 /*
 #status (0 = inactive, 1 = active)
@@ -16,22 +11,22 @@ const generateToken = (payload) => jwt.sign(payload, secret.key);
 exports.register = (req, res) => {
   const payload = {
     username: req.body.username,
-    password: hashPassword(req.body.password),
+    password: auth.hashPassword(req.body.password),
     status: 1
   }
   if (payload.username === null || payload.username === '') {
-    response.build(res, 200, false, 'Username cannot be empty', null, null)
+    response.authFailed(res, 'Username cannot be empty')
   } else if (payload.password === null || payload.password === '') {
-    response.build(res, 200, false, 'Password cannot be empty', null, null)
+    response.authFailed(res, 'Password cannot be empty')
   } else {
     Admin.findOne({ where: { username: req.body.username } }).then((data) => {
       if (data) {
-        response.build(res, 200, false, 'Username alredy existing', null, null)
+        response.authFailed(res, 'Username alredy existing')
       } else {
         Admin.create(payload).then(() => {
-          response.build(res, 201, true, `New account created, successfuly`, null, null)
+          response.created(res)
         }).catch((error) => {
-          response.build(res, 500, false, `Failed to create account`, null, error.message)
+          response.error500(res, error.message)
         })
       }
     })
@@ -40,15 +35,15 @@ exports.register = (req, res) => {
 
 exports.login = (req, res) => {
   if (req.body.username === null || req.body.username === '') {
-    response.build(res, 200, false, 'Username cannot be empty', null, null)
+    response.authFailed(res, 'Username cannot be empty')
   } else if (req.body.password === null || req.body.password === '') {
-    response.build(res, 200, false, 'Password cannot be empty', null, null)
+    response.authFailed(res, 'Password cannot be empty')
   } else {
     Admin.findOne({ where: { username: req.body.username } }).then((data) => {
       if(!data) {
-        response.build(res, 200, false, 'Failed! Username Not found', null, null)
-      } else if(!checkPassword(req.body.password, data.password)) {
-        response.build(res, 200, false, 'Failed! Wrong Password', null, null)
+        response.authFailed(res, 'Failed! Username Not found')
+      } else if(!auth.checkPassword(req.body.password, data.password)) {
+        response.authFailed(res, 'Failed! Wrong Password')
       } else {
         const payload = {
           id: data.id,
@@ -58,40 +53,64 @@ exports.login = (req, res) => {
         const user = {
           id: data.id,
           username: data.username,
-          token: generateToken(payload)
+          token: auth.generateToken(payload)
         }
         response.build(res, 200, true, 'Logged in successfully', user, null)
       }
     }).catch((error) => {
-      response.build(res, 500, false, `Failed`, null, error.message)
+      response.error500(res, error.message)
     })
   }
 };
 
-
 exports.update = (req, res) => {
-  const payload = {
-    username: req.body.username,
-    Password: req.body.new_password,
-    status: parseInt(req.body.status)
-  }
+  const username = req.body.username
+  const password = req.body.new_password
+  const status = req.body.status
   const oldPassword = req.body.old_password
   const token = req.headers.authorization
-  const credential = jwt.verify(token, secret.key, (err, decoded) => {
+  const userId = jwt.verify(token, secret.key, (err, decoded) => {
     if (err) {
       return err.message
     }
-    return decoded
+    return decoded.id
   })
-  Admin.findOne({ where: { id: credential.id } }).then((data) => {
-    if(!checkPassword(oldPassword, data.password)) {
-      response.build(res, 200, false, 'Failed! Wrong Password', null, null)
+  Admin.findOne({ where: { id: userId } }).then((data) => {
+    if(!auth.checkPassword(oldPassword, data.password)) {
+      response.authFailed(res, 'Failed! Wrong Password')
     } else {
-      Admin.update(payload, { where: { id: credential.id } }).then(() => {
-        response.build(res, 201, true, `Account was updated successfully`, null, null)
-      }).catch((err) => {
-        response.build(res, 500, false, `Failed to update account`, null, err.message)
-      })
+      if (status === undefined || status === '') {
+        Admin.update({ 
+          username: username,
+          password: auth.hashPassword(password),
+          status: 1 
+        }, { 
+          where: { id: userId } }).then(() => {
+          response.build(res, 201, true, `Account was updated successfully`, null, null)
+        }).catch((err) => {
+          response.error500(res, err.message)
+        })
+      } else if (username === undefined || username === '' || password === undefined || password === '') {
+        Admin.update({ 
+          status: parseInt(status)
+        }, { 
+          where: { id: userId } }).then(() => {
+          response.build(res, 201, true, `Account was deleted successfully`, null, null)
+        }).catch((err) => {
+          response.error500(res, err.message)
+        })
+      } else {
+        Admin.update({ 
+          username: username,
+          password: auth.hashPassword(password),
+          status: parseInt(status)
+        }, { 
+          where: { id: userId } }).then(() => {
+          response.build(res, 201, true, `Account was updated successfully`, null, null)
+        }).catch((err) => {
+          response.error500(res, err.message)
+        })
+      }
     }
   })
 };

@@ -52,24 +52,19 @@ exports.update = (req, res) => {
     name: req.body.name,
     status: req.body.status
   }
-  console.log(payload.name);
-  console.log(payload.status);
-  if (payload.status === undefined) {
-    console.log("1");
+  if (payload.status === undefined || payload.status === '') {
     category.update({ name: req.body.name, status: 1 }, { where: { id: categoryId } }).then(() => {
       response.build(res, 201, true, `Successfully`, null, null)
     }).catch((err) => {
       response.build(res, 500, false, `Failed`, null, err.message)
     })
-  } else if (payload.name === undefined) {
-    console.log("2");
+  } else if (payload.name === undefined || payload.name === '') {
     category.update({ status: parseInt(req.body.status) }, { where: { id: categoryId } }).then(() => {
       response.build(res, 201, true, `Successfully`, null, null)
     }).catch((err) => {
       response.build(res, 500, false, `Failed`, null, err.message)
     })
   } else {
-    console.log("3");
     category.update(payload, { where: { id: categoryId } }).then(() => {
       response.build(res, 201, true, `Successfully`, null, null)
     }).catch((err) => {

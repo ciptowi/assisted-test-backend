@@ -6,5 +6,5 @@ module.exports = function (router) {
     next();
   });
   router.post('/test-result/insert', controller.insert);
-  router.get('/test-result/:id', controller.get);
+  router.get('/test-result', controller.get);
 };

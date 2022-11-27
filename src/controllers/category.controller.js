@@ -9,7 +9,7 @@ exports.insert = (req, res) => {
   const payload = { name: req.body.name, status: 1 }
   category.create(payload).then(() => {
     response.created(res)
-    }).catch(() => {
+    }).catch((error) => {
       response.error500(res, error.message)
     })
 };

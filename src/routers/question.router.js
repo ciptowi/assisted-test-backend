@@ -7,12 +7,8 @@ module.exports = function (router) {
     next();
   });
   router.post('/question/insert', middleware.protected, controller.insert);
-  router.get('/question', );
-  router.get('/question/:id', );
-  router.put('/question/:id', ); // + delete
-
-  router.post('/answer/insert', );
-  router.get('/answer', );
-  router.get('/answer/:id', );
-  router.put('/answer/:id', ); // + delete
+  router.get('/question', controller.get);
+  router.get('/question/:id', controller.getById);
+  router.put('/question/:id', middleware.protected, controller.update);
+  router.delete('/question/:id', middleware.protected, controller.delete);
 }

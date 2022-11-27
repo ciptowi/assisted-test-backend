@@ -1,20 +1,29 @@
-const { partisipant } = require('../db/models');
+const { answer } = require('../db/models');
 const response = require('../utils/response');
+const jwt = require('jsonwebtoken');
+const secret = require('../config/secret');
 
 /*
 #status (0 = inactive, 1 = active)
 */
 
 exports.insert = (req, res) => {
+  const token = req.headers.authorization
+  const userId = jwt.verify(token, secret.key, (err, decoded) => {
+    if (err) {
+      return err.message
+    }
+    return decoded.id
+  })
   const payload = { 
-    test_session_id: req.body.test_session_id,
+    content: req.body.content, 
+    status: 1 ,
+    admin_id: userId || req.body.admin_id,
     category_id: req.body.category_id,
-    nik: req.body.nik,
-    name: req.body.name,
-    participant_numb: req.body.participant_numb,
-    score: 0 || req.body.status
+    question_id: req.body.question_id,
+    score: req.body.score
   }
-  partisipant.create(payload).then(() => {
+  answer.create(payload).then(() => {
     response.created(res)
     }).catch((error) => {
       response.error500(res, error.message)
@@ -22,17 +31,15 @@ exports.insert = (req, res) => {
 };
 exports.get = (req, res) => {
   const status = req.query.status
-  const test_session_id = req.query.test_session_id
+  const question_id = req.query.question_id
 if (status === undefined || status === '' && question_id === undefined || question_id === '') {
-  partisipant.findAll().then((data) => {
+  answer.findAll().then((data) => {
       response.success(res, data)
       }).catch((error) => {
         response.error500(res, error.message)
       })
 } else {
-  partisipant.findAll({ where: { 
-    test_session_id: test_session_id 
-  } }).then((data) => {
+  answer.findAll({ where: { status: status, question_id: question_id } }).then((data) => {
     response.success(res, data)
     }).catch((error) => {
       response.error500(res, error.message)
@@ -41,8 +48,8 @@ if (status === undefined || status === '' && question_id === undefined || questi
 };
 
 exports.getById = (req, res) => {
-  const partisipantId = req.params.id
-    partisipant.findOne({ where: { id: partisipantId } }).then((data) => {
+  const answerId = req.params.id
+    answer.findOne({ where: { id: answerId } }).then((data) => {
       response.success(res, data)
       }).catch((error) => {
         response.error500(res, error.message)
@@ -50,16 +57,14 @@ exports.getById = (req, res) => {
 };
 
 exports.update = (req, res) => {
-  const partisipantId = req.params.id
+  const answerId = req.params.id
   const payload = {
-    test_session_id: req.body.test_session_id,
-    category_id: req.body.category_id,
-    nik: req.body.nik,
-    name: req.body.name,
-    participant_numb: req.body.participant_numb,
-    score: req.body.status
+    admin_id: req.body.admin_id,
+    question_id: req.body.question_id,
+    content: req.body.content,
+    score: req.body.score
   }
-  partisipant.update(payload, { where: { id: partisipantId } }).then(() => {
+  answer.update(payload, { where: { id: answerId } }).then(() => {
     response.build(res, 201, true, `Successfully`, null, null)
   }).catch((err) => {
     response.error500(res, err.message)
@@ -67,8 +72,8 @@ exports.update = (req, res) => {
 };
 
 exports.delete = (req, res) => {
-  const partisipantId = req.params.id
-  partisipant.update({ status: 0 }, { where: { id: partisipantId } }).then(() => {
+  const answerId = req.params.id
+  answer.update({ status: 0 }, { where: { id: answerId } }).then(() => {
     response.build(res, 201, true, `Status Deleted`, null, null)
   }).catch((err) => {
     response.error500(res, err.message)

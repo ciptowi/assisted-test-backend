@@ -1,5 +1,7 @@
 const { question } = require('../db/models');
 const response = require('../utils/response');
+const jwt = require('jsonwebtoken');
+const secret = require('../config/secret');
 
 /*
 #status (0 = inactive, 1 = active)
@@ -19,33 +21,26 @@ exports.insert = (req, res) => {
     admin_id: userId || req.body.admin_id,
     category_id: req.body.category_id
   }
-  question.create(payload).then(() => {s
+  question.create(payload).then(() => {
     response.created(res)
-    }).catch(() => {
+    }).catch((error) => {
       response.error500(res, error.message)
     })
 };
 exports.get = (req, res) => {
   const status = req.query.status
-  const name = req.query.name
-  if (name !== undefined) {
-    question.findAll({ where: { name: name } }).then((data) => {
+if (status === undefined || status === '') {
+  question.findAll().then((data) => {
       response.success(res, data)
       }).catch((error) => {
         response.error500(res, error.message)
       })
-  } else if (status !== undefined) {
-    question.findAll({ where: { status: status } }).then((data) => {
-      response.success(res, data)
-      }).catch((error) => {
-        response.error500(res, error.message)
-      })
-  } else {
-    question.findAll().then((data) => {
-      response.success(res, data)
-      }).catch((error) => {
-        response.error500(res, error.message)
-      })
+} else {
+  question.findAll({ where: { status: status } }).then((data) => {
+    response.success(res, data)
+    }).catch((error) => {
+      response.error500(res, error.message)
+    })
   }
 };
 
@@ -61,26 +56,21 @@ exports.getById = (req, res) => {
 exports.update = (req, res) => {
   const questionId = req.params.id
   const payload = {
-    name: req.body.name,
-    status: req.body.status
+    content: req.body.content, 
+    category_id: req.body.category_id
   }
-  if (payload.status === undefined || payload.status === '') {
-    question.update({ name: req.body.name, status: 1 }, { where: { id: questionId } }).then(() => {
-      response.build(res, 201, true, `Successfully`, null, null)
-    }).catch((err) => {
-      response.error500(res, err.message)
-    })
-  } else if (payload.name === undefined || payload.name === '') {
-    question.update({ status: parseInt(req.body.status) }, { where: { id: questionId } }).then(() => {
-      response.build(res, 201, true, `Successfully`, null, null)
-    }).catch((err) => {
-      response.error500(res, err.message)
-    })
-  } else {
-    question.update(payload, { where: { id: questionId } }).then(() => {
-      response.build(res, 201, true, `Successfully`, null, null)
-    }).catch((err) => {
-      response.error500(res, err.message)
-    })
-  }
+  question.update(payload, { where: { id: questionId } }).then(() => {
+    response.build(res, 201, true, `Successfully`, null, null)
+  }).catch((err) => {
+    response.error500(res, err.message)
+  })
+};
+
+exports.delete = (req, res) => {
+  const questionId = req.params.id
+  question.update({ status: 0 }, { where: { id: questionId } }).then(() => {
+    response.build(res, 201, true, `Status Deleted`, null, null)
+  }).catch((err) => {
+    response.error500(res, err.message)
+  })
 };
